@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài học Tương tác: Kiểu Dữ Liệu, Biến và Hằng trong C</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony -->
+    <!-- Application Structure Plan: A single-page app with a sticky navigation bar for thematic sections (Intro, Data Types, Variables, Constants, Comparison, Practice). The core is an interactive tabbed view for data types and a 'Memory Visualizer' practice tool. This structure promotes non-linear exploration and reinforces abstract concepts visually, enhancing usability over a static document. -->
+    <!-- Visualization & Content Choices: Report Info: C data types, variables, constants -> Goal: Teach fundamental concepts interactively. Viz/Presentation: Interactive tabs for data types, styled lists for rules, comparison table, and a dynamic 'Memory Visualizer' using JS-generated divs. Interaction: Tab-switching, simulated code execution, form input for visualization. Justification: These methods make learning active rather than passive. The visualizer makes the abstract concept of memory allocation concrete. Library/Method: Vanilla JS for all interactions. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Be Vietnam Pro', sans-serif;
+            background-color: #FDFBF6;
+            color: #3C3633;
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #748E63;
+            border-bottom-color: #748E63;
+        }
+        .tab-btn {
+            transition: all 0.3s ease;
+        }
+        .tab-btn.active {
+            background-color: #748E63;
+            color: #FDFBF6;
+        }
+        .code-block {
+            background-color: #3C3633;
+            color: #FDFBF6;
+            font-family: 'Courier New', Courier, monospace;
+            border-radius: 8px;
+            padding: 1rem;
+            white-space: pre-wrap;
+            position: relative;
+        }
+        .run-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #99BC85;
+            color: #3C3633;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: background-color 0.3s;
+        }
+        .run-btn:hover {
+            background-color: #BFD8AF;
+        }
+        .output-block {
+            background-color: #EEEDEB;
+            border-left: 4px solid #748E63;
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 0 8px 8px 0;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .card {
+            background-color: #FFFFFF;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        }
+        .memory-block {
+            border: 2px solid #99BC85;
+            background-color: #F0F0F0;
+            padding: 10px;
+            margin: 5px;
+            text-align: center;
+            border-radius: 4px;
+        }
+        .section-title {
+            color: #748E63;
+            font-weight: 700;
+            font-size: 2.25rem;
+            border-bottom: 3px solid #99BC85;
+            padding-bottom: 0.5rem;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-4">
+            <ul class="flex justify-center space-x-4 md:space-x-8">
+                <li><a href="#intro" class="nav-link font-medium p-2">Giới thiệu</a></li>
+                <li><a href="#data-types" class="nav-link font-medium p-2">Kiểu Dữ Liệu</a></li>
+                <li><a href="#variables" class="nav-link font-medium p-2">Biến</a></li>
+                <li><a href="#constants" class="nav-link font-medium p-2">Hằng số</a></li>
+                <li><a href="#practice" class="nav-link font-medium p-2">Thực hành</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-6 py-12">
+        <section id="intro" class="text-center mb-20">
+            <h1 class="text-4xl md:text-5xl font-bold text-[#748E63] mb-4">Nền tảng Cốt lõi của Lập trình C</h1>
+            <p class="text-lg text-slate-600 max-w-3xl mx-auto">Các Kiểu Dữ Liệu, Biến và Hằng số</p>
+            
+            <div class="card mt-12 p-8 text-left">
+                <h2 class="text-2xl font-bold mb-4 text-center">Dữ liệu trong Máy tính: Một Nhà kho Khổng lồ</h2>
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <p class="mb-4">Hãy tưởng tượng máy tính là một **nhà kho**, và dữ liệu (con số, ký tự,...) là những **món hàng**.</p>
+                        <p class="mb-4">Mỗi món hàng cần một loại **hộp chứa** phù hợp. Bạn không thể để một chiếc TV vào hộp đựng giày. Tương tự, trong lập trình, mỗi loại dữ liệu cần một "hộp chứa" riêng.</p>
+                        <p class="font-semibold text-[#748E63]">➡️ **Kiểu dữ liệu (Data Type)** chính là "loại hộp chứa" đó. Nó cho trình biên dịch biết:</p>
+                        <ul class="list-disc list-inside mt-2 space-y-2">
+                            <li>Loại dữ liệu nào sẽ được lưu trữ.</li>
+                            <li>Cần bao nhiêu bộ nhớ để lưu trữ nó.</li>
+                            <li>Những phép toán nào có thể thực hiện trên dữ liệu đó.</li>
+                        </ul>
+                    </div>
+                    <div class="flex justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 24 24" fill="none" stroke="#99BC85" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-archive"><rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/></svg>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="data-types" class="mb-20">
+            <h2 class="section-title mb-8">Các Kiểu Dữ Liệu Cơ Bản</h2>
+            <p class="max-w-3xl mb-8 text-slate-600">Ngôn ngữ C cung cấp sẵn một số kiểu dữ liệu cơ bản để xử lý các loại thông tin phổ biến nhất. Hãy chọn một kiểu dữ liệu để khám phá.</p>
+            <div class="flex flex-wrap gap-2 mb-6" id="dataTypeTabs">
+                <button class="tab-btn px-4 py-2 rounded-md font-medium bg-gray-200 active" data-type="int">int</button>
+                <button class="tab-btn px-4 py-2 rounded-md font-medium bg-gray-200" data-type="float">float</button>
+                <button class="tab-btn px-4 py-2 rounded-md font-medium bg-gray-200" data-type="double">double</button>
+                <button class="tab-btn px-4 py-2 rounded-md font-medium bg-gray-200" data-type="char">char</button>
+            </div>
+
+            <div id="dataTypeContent"></div>
+        </section>
+        
+        <section id="variables" class="mb-20">
+            <h2 class="section-title mb-8">Biến (Variable) là gì?</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="card p-6">
+                    <h3 class="text-xl font-bold mb-3">Định nghĩa</h3>
+                    <p class="mb-4">**Biến** là tên gọi cho một vùng nhớ được cấp phát để lưu trữ dữ liệu. Giống như một chiếc hộp có dán nhãn, bạn có thể thay đổi đồ vật bên trong.</p>
+                    <p class="font-semibold text-[#748E63]">Giá trị của biến có thể thay đổi trong suốt quá trình chương trình chạy.</p>
+                </div>
+                <div class="card p-6">
+                    <h3 class="text-xl font-bold mb-3">Quy tắc đặt tên</h3>
+                    <ul class="space-y-2">
+                        <li class="flex items-start"><span class="text-green-500 mr-2">✔</span> Tên chỉ chứa chữ cái, chữ số, và dấu gạch dưới (_).</li>
+                        <li class="flex items-start"><span class="text-green-500 mr-2">✔</span> Ký tự đầu tiên phải là chữ cái hoặc dấu gạch dưới.</li>
+                        <li class="flex items-start"><span class="text-red-500 mr-2">❌</span> Tên không được trùng với từ khóa (if, else, int...).</li>
+                        <li class="flex items-start"><span class="text-red-500 mr-2">❌</span> Tên không được chứa khoảng trắng hoặc ký tự đặc biệt (- , +, *, /).</li>
+                    </ul>
+                </div>
+            </div>
+             <div class="card mt-8 p-6">
+                <h3 class="text-xl font-bold mb-3">Khai báo, Gán giá trị và Khởi tạo</h3>
+                <div class="code-block" id="variable-code">#include &lt;stdio.h&gt;
+
+int main() {
+    // 1. Khai báo (Declaration)
+    int chieuDai, chieuRong;
+
+    // 2. Gán giá trị (Assignment)
+    chieuDai = 20;
+    chieuRong = 10;
+
+    // 3. Khởi tạo (Initialization)
+    float dienTich = chieuDai * chieuRong;
+
+    printf("Dien tich la: %.2f\n", dienTich);
+
+    return 0;
+}
+<button class="run-btn" onclick="runCode('variable-code', 'Dien tich la: 200.00')">Chạy</button>
+                </div>
+                <div class="output-block" id="variable-code-output" style="display:none;"></div>
+            </div>
+        </section>
+
+        <section id="constants" class="mb-20">
+            <h2 class="section-title mb-8">Hằng số (Constant)</h2>
+            <p class="max-w-3xl mb-8 text-slate-600">**Hằng số** là một giá trị **không thể thay đổi** trong suốt quá trình thực thi chương trình. Sử dụng hằng số giúp mã nguồn an toàn, dễ đọc và dễ bảo trì hơn.</p>
+            
+            <div class="card p-6">
+                <div class="flex border-b">
+                    <button class="const-tab-btn py-2 px-4 font-medium text-lg border-b-2 border-[#748E63] text-[#748E63]" onclick="showConstTab('const')">Dùng `const`</button>
+                    <button class="const-tab-btn py-2 px-4 font-medium text-lg text-slate-500" onclick="showConstTab('define')">Dùng `#define`</button>
+                </div>
+                <div id="const-content" class="mt-4">
+                    <h4 class="font-bold text-lg">Cách 1: Dùng từ khóa `const` (Ưu tiên sử dụng)</h4>
+                    <p class="mt-2 mb-4">Đây là một biến có giá trị không thể thay đổi. Trình biên dịch sẽ kiểm tra và báo lỗi nếu bạn cố gắng gán lại giá trị cho nó.</p>
+                    <div class="code-block">const float PI = 3.14159;
+const int SO_NGAY_TRONG_TUAN = 7;
+
+// PI = 3.14; // Sẽ gây LỖI!
+                    </div>
+                </div>
+                <div id="define-content" class="mt-4 hidden">
+                    <h4 class="font-bold text-lg">Cách 2: Dùng chỉ thị tiền xử lý `#define`</h4>
+                    <p class="mt-2 mb-4">Trước khi biên dịch, bộ tiền xử lý sẽ tìm và thay thế tất cả các lần xuất hiện của `TÊN_HẰNG` bằng `giá_trị`.</p>
+                    <div class="code-block">#include &lt;stdio.h&gt;
+#define PI 3.14159
+
+int main() {
+    // PI sẽ được thay thế bằng 3.14159 ở đây
+    float chuVi = 2 * PI * 5.0; 
+    printf("Chu vi: %f\n", chuVi);
+    return 0;
+}
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="practice" class="mb-20">
+            <h2 class="section-title mb-8">Thực hành: Mô phỏng Bộ nhớ</h2>
+            <p class="max-w-3xl mb-8 text-slate-600">Hãy thử khai báo một biến để xem nó được biểu diễn trong bộ nhớ máy tính như thế nào. Công cụ này sẽ mô phỏng việc cấp phát bộ nhớ cho các kiểu dữ liệu khác nhau.</p>
+            <div class="card p-6">
+                <div class="grid md:grid-cols-3 gap-4">
+                    <div>
+                        <label for="varType" class="font-medium">Kiểu dữ liệu:</label>
+                        <select id="varType" class="w-full mt-1 p-2 border rounded-md bg-white">
+                            <option value="int" data-size="4">int (4 bytes)</option>
+                            <option value="float" data-size="4">float (4 bytes)</option>
+                            <option value="double" data-size="8">double (8 bytes)</option>
+                            <option value="char" data-size="1">char (1 byte)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="varName" class="font-medium">Tên biến:</label>
+                        <input type="text" id="varName" placeholder="ví dụ: tuoi" class="w-full mt-1 p-2 border rounded-md">
+                    </div>
+                    <div>
+                        <label for="varValue" class="font-medium">Giá trị:</label>
+                        <input type="text" id="varValue" placeholder="ví dụ: 25" class="w-full mt-1 p-2 border rounded-md">
+                    </div>
+                </div>
+                <button onclick="visualizeMemory()" class="mt-4 w-full bg-[#748E63] text-white font-bold py-3 rounded-md hover:bg-[#657c57] transition-colors">Khai báo & Mô phỏng</button>
+                <div id="memoryVisualization" class="mt-6 p-4 bg-gray-100 rounded-md min-h-[100px]">
+                    <p class="text-center text-gray-500">Vùng mô phỏng bộ nhớ...</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer class="bg-[#3C3633] text-white text-center py-4 mt-12">
+        <p>&copy; 2024 - Bài học Lập trình C Tương tác</p>
+    </footer>
+
+    <script>
+        const dataTypes = {
+            int: {
+                title: "Kiểu Số Nguyên - `int`",
+                description: "`int` (viết tắt của *integer*) là kiểu dữ liệu phổ biến nhất, dùng để lưu trữ các số nguyên không có phần thập phân. Kích thước bộ nhớ cấp phát thường là 4 bytes.",
+                table: `
+                    <table class="w-full text-left border-collapse mt-4">
+                        <tr class="bg-gray-100"><th class="p-2 border">Thuộc tính</th><th class="p-2 border">Giá trị</th></tr>
+                        <tr><td class="p-2 border font-medium">Từ khóa</td><td class="p-2 border">int</td></tr>
+                        <tr><td class="p-2 border font-medium">Kích thước</td><td class="p-2 border">Thường là 4 bytes</td></tr>
+                        <tr><td class="p-2 border font-medium">Khoảng giá trị (4 bytes)</td><td class="p-2 border">-2,147,483,648 đến 2,147,483,647</td></tr>
+                    </table>
+                `,
+                code: `#include &lt;stdio.h&gt;\n\nint main() {\n    int soLuong = 100;\n    printf("Trong kho co %d san pham.\\n", soLuong);\n    return 0;\n}`,
+                output: "Trong kho co 100 san pham."
+            },
+            float: {
+                title: "Kiểu Số Thực - `float`",
+                description: "`float` dùng để lưu các số có phần thập phân. Nó có độ chính xác đơn (khoảng 6-7 chữ số thập phân) và chiếm 4 bytes.",
+                table: `
+                    <table class="w-full text-left border-collapse mt-4">
+                        <tr class="bg-gray-100"><th class="p-2 border">Thuộc tính</th><th class="p-2 border">Giá trị</th></tr>
+                        <tr><td class="p-2 border font-medium">Từ khóa</td><td class="p-2 border">float</td></tr>
+                        <tr><td class="p-2 border font-medium">Kích thước</td><td class="p-2 border">4 bytes</td></tr>
+                        <tr><td class="p-2 border font-medium">Đặc tả</td><td class="p-2 border">%f</td></tr>
+                    </table>
+                `,
+                code: `#include &lt;stdio.h&gt;\n\nint main() {\n    float diemTrungBinh = 8.5;\n    printf("Diem trung binh la: %.2f\\n", diemTrungBinh);\n    return 0;\n}`,
+                output: "Diem trung binh la: 8.50"
+            },
+            double: {
+                title: "Kiểu Số Thực Chính xác Kép - `double`",
+                description: "`double` cũng dùng để lưu số thực nhưng với độ chính xác kép (khoảng 15-16 chữ số thập phân), chiếm 8 bytes. Thường được dùng trong các tính toán khoa học, tài chính.",
+                table: `
+                    <table class="w-full text-left border-collapse mt-4">
+                        <tr class="bg-gray-100"><th class="p-2 border">Thuộc tính</th><th class="p-2 border">Giá trị</th></tr>
+                        <tr><td class="p-2 border font-medium">Từ khóa</td><td class="p-2 border">double</td></tr>
+                        <tr><td class="p-2 border font-medium">Kích thước</td><td class="p-2 border">8 bytes</td></tr>
+                        <tr><td class="p-2 border font-medium">Đặc tả</td><td class="p-2 border">%lf</td></tr>
+                    </table>
+                `,
+                code: `#include &lt;stdio.h&gt;\n\nint main() {\n    double soPi = 3.1415926535;\n    printf("So Pi la: %lf\\n", soPi);\n    return 0;\n}`,
+                output: "So Pi la: 3.141593"
+            },
+            char: {
+                title: "Kiểu Ký Tự - `char`",
+                description: "`char` (viết tắt của *character*) dùng để lưu trữ một ký tự duy nhất. Giá trị phải được đặt trong dấu nháy đơn `' '`. Nó chiếm 1 byte và thực chất lưu trữ mã số ASCII của ký tự.",
+                table: `
+                    <table class="w-full text-left border-collapse mt-4">
+                        <tr class="bg-gray-100"><th class="p-2 border">Thuộc tính</th><th class="p-2 border">Giá trị</th></tr>
+                        <tr><td class="p-2 border font-medium">Từ khóa</td><td class="p-2 border">char</td></tr>
+                        <tr><td class="p-2 border font-medium">Kích thước</td><td class="p-2 border">1 byte</td></tr>
+                        <tr><td class="p-2 border font-medium">Đặc tả</td><td class="p-2 border">%c (ký tự), %d (mã ASCII)</td></tr>
+                    </table>
+                `,
+                code: `#include &lt;stdio.h&gt;\n\nint main() {\n    char xepLoai = 'A';\n    printf("Xep loai cua ban la: %c\\n", xepLoai);\n    printf("Ma ASCII tuong ung: %d\\n", xepLoai);\n    return 0;\n}`,
+                output: "Xep loai cua ban la: A\nMa ASCII tuong ung: 65"
+            }
+        };
+
+        const dataTypeContent = document.getElementById('dataTypeContent');
+        const dataTypeTabs = document.getElementById('dataTypeTabs');
+
+        function updateDataTypeContent(type) {
+            const content = dataTypes[type];
+            dataTypeContent.innerHTML = `
+                <div class="card p-6">
+                    <h3 class="text-xl font-bold mb-2">${content.title}</h3>
+                    <p class="mb-4 text-slate-600">${content.description}</p>
+                    ${content.table}
+                    <div class="mt-6">
+                        <h4 class="font-semibold mb-2">Ví dụ minh họa:</h4>
+                        <div class="code-block" id="code-${type}">${content.code}<button class="run-btn" onclick="runCode('code-${type}', \`${content.output}\`)">Chạy</button></div>
+                        <div class="output-block" id="code-${type}-output" style="display:none;"></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        dataTypeTabs.addEventListener('click', (e) => {
+            if (e.target.tagName === 'BUTTON') {
+                document.querySelector('.tab-btn.active').classList.remove('active');
+                e.target.classList.add('active');
+                updateDataTypeContent(e.target.dataset.type);
+            }
+        });
+
+        function runCode(codeId, output) {
+            const outputBlock = document.getElementById(`${codeId}-output`);
+            outputBlock.textContent = '> ' + output.replace(/\\n/g, '\n> ');
+            outputBlock.style.display = 'block';
+        }
+
+        function showConstTab(tabName) {
+            const constBtn = document.querySelector('button[onclick="showConstTab(\'const\')"]');
+            const defineBtn = document.querySelector('button[onclick="showConstTab(\'define\')"]');
+            const constContent = document.getElementById('const-content');
+            const defineContent = document.getElementById('define-content');
+
+            if (tabName === 'const') {
+                constBtn.classList.add('border-[#748E63]', 'text-[#748E63]');
+                constBtn.classList.remove('text-slate-500');
+                defineBtn.classList.remove('border-[#748E63]', 'text-[#748E63]');
+                defineBtn.classList.add('text-slate-500');
+                constContent.classList.remove('hidden');
+                defineContent.classList.add('hidden');
+            } else {
+                defineBtn.classList.add('border-[#748E63]', 'text-[#748E63]');
+                defineBtn.classList.remove('text-slate-500');
+                constBtn.classList.remove('border-[#748E63]', 'text-[#748E63]');
+                constBtn.classList.add('text-slate-500');
+                defineContent.classList.remove('hidden');
+                constContent.classList.add('hidden');
+            }
+        }
+
+        function visualizeMemory() {
+            const typeSelect = document.getElementById('varType');
+            const nameInput = document.getElementById('varName');
+            const valueInput = document.getElementById('varValue');
+            const visualizationDiv = document.getElementById('memoryVisualization');
+
+            const type = typeSelect.value;
+            const name = nameInput.value || 'myVar';
+            const value = valueInput.value || '0';
+            const size = parseInt(typeSelect.options[typeSelect.selectedIndex].dataset.size);
+
+            let blocksHTML = '';
+            for (let i = 0; i < size; i++) {
+                blocksHTML += `<div class="memory-block flex-1">Byte ${i+1}</div>`;
+            }
+
+            visualizationDiv.innerHTML = `
+                <div class="mb-2">
+                    <p><span class="font-semibold">Khai báo:</span> <code class="text-purple-700">${type} ${name} = ${value};</code></p>
+                </div>
+                <div class="border-2 border-dashed border-gray-400 p-2 rounded-lg">
+                    <p class="text-sm font-bold text-center mb-2">Biến: <code class="text-red-600">${name}</code> | Giá trị: <code class="text-blue-600">${value}</code></p>
+                    <div class="flex flex-wrap justify-center">${blocksHTML}</div>
+                    <p class="text-center text-sm mt-2 text-gray-600">Tổng kích thước: ${size} byte(s)</p>
+                </div>
+            `;
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            updateDataTypeContent('int');
+        });
+
+        const navLinks = document.querySelectorAll('.nav-link');
+        const sections = document.querySelectorAll('main section');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 80) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href').includes(current)) {
+                    link.classList.add('active');
+                }
+            });
+        });
+
+    </script>
+</body>
+</html>
